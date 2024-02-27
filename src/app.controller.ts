@@ -8,14 +8,6 @@ export class AppController {
 
   @Get('/application/info')
   getAppInfo(): AppInfoDto {    
-    const filePath = 'package.json';
-    const packageJson = this.appService.readJSON(filePath);
-
-    return new AppInfoDto({
-      name: packageJson.name,
-      version: packageJson.version,
-      description: packageJson.description,
-      author: packageJson.author
-    });
+    return new AppInfoDto();
   }
 }

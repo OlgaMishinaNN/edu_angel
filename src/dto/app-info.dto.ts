@@ -1,23 +1,40 @@
 // AppInfoDto
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class AppInfoDto {
-    @ApiProperty({ nullable: false })
-    name: string;
+    @ApiProperty({ 
+      type: String,
+      description: "The name of the application",
+      nullable: false })
+    @IsString()
+    readonly name: string;
 
-    @ApiProperty({ nullable: false })
-    version: string;
+    @ApiProperty({ 
+      type: String,
+      description: "The current version of the application",
+      nullable: false })
+    @IsString()
+    readonly version: string;
 
-    @ApiProperty({ nullable: false })
-    description: string;
+    @ApiProperty({ 
+      type: String,
+      description: "The description of the application",
+      nullable: false })
+    @IsString()
+    readonly description: string;
 
-    @ApiProperty({ nullable: false })
-    author: string;
+    @ApiProperty({ 
+      type: String,
+      description: "The author of the application",
+      nullable: false })
+    @IsString()
+    readonly author: string;
 
-    constructor(appinfo: AppInfoDto) {
-      this.name = appinfo.name;
-      this.version = appinfo.version;
-      this.description = appinfo.description;
-      this.author = appinfo.author;
+    constructor() {
+      this.name = process.env.npm_package_name ?? 'undefined';
+      this.version = process.env.npm_package_version ?? 'undefined';
+      this.description = process.env.npm_package_description ?? 'undefined';
+      this.author = process.env.npm_package_author ?? 'undefined';
     }
   }

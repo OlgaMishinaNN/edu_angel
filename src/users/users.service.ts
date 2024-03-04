@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, HttpStatus, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, HttpStatus, ConflictException, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,6 +31,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
+    Logger.log(id);
     const user = await this.repository
       .createQueryBuilder("user")
       .where("user.id= :id", { id: id })

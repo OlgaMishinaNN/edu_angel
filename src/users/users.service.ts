@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, HttpStatus, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, HttpStatus, ConflictException, NotFoundException, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -31,24 +31,30 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    Logger.log(id);
-    const user = await this.repository
-      .createQueryBuilder("user")
-      .where("user.id= :id", { id: id })
-      .getOne()
-
-    if (!user) {
-      throw new NotFoundException(`User #${id} not found`);
-    }
-
-    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string): Promise<User | null> {
+    const existingUser = await this.repository.findOne({
+      where: { id: id, deleted_at: IsNull() },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(id);
+    }
+
+    const deleteResponse = await this.repository.softDelete({id});
+    if (!deleteResponse.affected) {
+      throw new NotFoundException(id);
+    }
+
+    const deletedUser = await this.repository.findOne({
+       where: { id: id },
+       withDeleted: true
+    });
+    return deletedUser;
   }
 }

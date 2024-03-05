@@ -33,6 +33,7 @@ export class UsersController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    const response = this.usersService.remove(id);;
+    return plainToInstance(UserDto, response); 
   }
 }

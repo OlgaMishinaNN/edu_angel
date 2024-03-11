@@ -1,5 +1,11 @@
 import { IsEmail } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -17,8 +23,8 @@ export class User {
   last_name: string;
 
   @CreateDateColumn()
-  created_at: Date
+  created_at: Date;
 
   @DeleteDateColumn()
-  deleted_at: Date
+  deleted_at: Date;
 }

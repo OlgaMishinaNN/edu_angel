@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from './dto/user.dto';
-import { plainToInstance } from 'class-transformer';
+import { ApiCreatedResponse } from '@nestjs/swagger';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -11,9 +23,20 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto ) {
-    const responseDto = this.usersService.create(createUserDto);
-    return plainToInstance(UserDto, responseDto); 
+  @ApiCreatedResponse({ type: UserDto })
+  async create(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.findOne(
+      undefined,
+      createUserDto.email,
+      false,
+    );
+
+    if (user) {
+      throw new ConflictException(
+        `Email address '${createUserDto.email}' already registered.`,
+      );
+    }
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
@@ -22,18 +45,33 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const user = await this.usersService.findOne(id, undefined, false);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    await this.usersService.update(id, updateUserDto);
+    return await this.usersService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    const response = this.usersService.remove(id);;
-    return plainToInstance(UserDto, response); 
+  async remove(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id, undefined, false);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    const response = await this.usersService.remove(id);
+    if (!response.affected) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.findOne(id);
   }
 }

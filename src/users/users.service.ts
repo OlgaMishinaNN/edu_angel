@@ -1,27 +1,16 @@
-import { Injectable, HttpStatus, ConflictException, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not, IsNull, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly repository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly repository: Repository<User>,
+  ) {}
 
   async create(createItemDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.repository.findOne({
-      where: { email: createItemDto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException({
-        status: HttpStatus.CONFLICT,
-        error: `Email address "${createItemDto.email}" already registered.`,
-        element: 'email',
-      });
-    }
-
     const newUser = this.repository.create(createItemDto);
     return this.repository.save(newUser);
   }
@@ -30,39 +19,20 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  async findOne(id: string) {
+  async findOne(id?: string, email?: string, includeDeleted = true) {
     const user = await this.repository.findOne({
-      where: { id: id },
-      withDeleted: true
+      where: [{ id: id }, { email: email }],
+      withDeleted: includeDeleted,
     });
-    if (!user) {
-      throw new NotFoundException(id);
-    }
-   return user;
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: any): Promise<UpdateResult> {
+    return await this.repository.update(id, updateUserDto);
   }
 
-  async remove(id: string): Promise<User | null> {
-    const existingUser = await this.repository.findOne({
-      where: { id: id, deleted_at: IsNull() },
-    });
-
-    if (!existingUser) {
-      throw new NotFoundException(id);
-    }
-
-    const deleteResponse = await this.repository.softDelete({id});
-    if (!deleteResponse.affected) {
-      throw new NotFoundException(id);
-    }
-
-    const deletedUser = await this.repository.findOne({
-       where: { id: id },
-       withDeleted: true
-    });
-    return deletedUser;
+  async remove(id: string): Promise<UpdateResult> {
+    return await this.repository.softDelete(id);
   }
 }

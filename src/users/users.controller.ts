@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -25,11 +25,7 @@ export class UsersController {
   @Post()
   @ApiCreatedResponse({ type: UserDto })
   async create(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.findOne(
-      undefined,
-      createUserDto.email,
-      false,
-    );
+    const user = await this.usersService.findByEmail(createUserDto.email);
 
     if (user) {
       throw new ConflictException(
@@ -46,24 +42,24 @@ export class UsersController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.usersService.findOne(id);
+    return await this.usersService.findById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.findOne(id, undefined, false);
-    if (!user) {
+    const user = await this.usersService.findById(id);
+    if (!user || user.deleted_at != null) {
       throw new NotFoundException();
     }
 
     await this.usersService.update(id, updateUserDto);
-    return await this.usersService.findOne(id);
+    return await this.usersService.findById(id);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const user = await this.usersService.findOne(id, undefined, false);
-    if (!user) {
+    const user = await this.usersService.findById(id);
+    if (!user || user.deleted_at != null) {
       throw new NotFoundException();
     }
 
@@ -72,6 +68,6 @@ export class UsersController {
       throw new NotFoundException();
     }
 
-    return await this.usersService.findOne(id);
+    return await this.usersService.findById(id);
   }
 }

@@ -19,10 +19,19 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  async findOne(id?: string, email?: string, includeDeleted = true) {
+  async findById(id: string) {
     const user = await this.repository.findOne({
-      where: [{ id: id }, { email: email }],
-      withDeleted: includeDeleted,
+      where: { id: id },
+      withDeleted: true,
+    });
+
+    return user;
+  }
+
+  async findByEmail(email: string) {
+    const user = await this.repository.findOne({
+      where: { email: email },
+      withDeleted: true,
     });
 
     return user;

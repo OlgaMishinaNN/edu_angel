@@ -10,21 +10,21 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column('varchar', { unique: true, nullable: false, length: 255 })
   @IsEmail()
-  email: string;
+  email!: string;
 
   @Column('varchar', { nullable: false, length: 100 })
-  first_name: string;
+  first_name!: string;
 
   @Column('varchar', { nullable: false, length: 100 })
-  last_name: string;
+  last_name!: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @DeleteDateColumn()
-  deleted_at: Date;
+  deleted_at?: Date;
 }

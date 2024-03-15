@@ -4,6 +4,7 @@ import { Expose } from 'class-transformer';
 
 export class CreateUserDto {
   @ApiProperty({
+    name: 'email',
     type: String,
     description: 'The email of the user',
     nullable: false,
@@ -12,9 +13,10 @@ export class CreateUserDto {
   @MaxLength(255, {
     message: 'Email is too long',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({
+    name: 'first_name',
     type: String,
     description: 'The first name of the user',
     nullable: false,
@@ -24,9 +26,10 @@ export class CreateUserDto {
     message: 'First name is too long',
   })
   @Expose({ name: 'first_name' })
-  firstName: string;
+  firstName!: string;
 
   @ApiProperty({
+    name: 'last_name',
     type: String,
     description: 'The last name of the user',
     nullable: false,
@@ -36,5 +39,5 @@ export class CreateUserDto {
     message: 'Last name is too long',
   })
   @Expose({ name: 'last_name' })
-  lastName: string;
+  lastName!: string;
 }

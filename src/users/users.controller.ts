@@ -10,6 +10,7 @@ import {
   ClassSerializerInterceptor,
   ConflictException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -48,8 +49,15 @@ export class UsersController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = await this.usersService.findById(id);
-    if (!user || user.deleted_at != null) {
-      throw new NotFoundException();
+    if (!user) {
+      throw new NotFoundException(`User with id '${id}' is not found.`);
+    }
+    if (user.deleted_at != null) {
+      throw new NotFoundException(`User with id '${id}' has been deleted.`);
+    }
+
+    if (JSON.stringify(updateUserDto) === '{}') {
+      throw new BadRequestException('Empty request body provided.');
     }
 
     await this.usersService.update(id, updateUserDto);

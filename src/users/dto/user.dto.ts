@@ -7,7 +7,6 @@ export class UserDto {
     name: 'id',
     type: String,
     description: 'The id of the user',
-    nullable: false,
   })
   id!: string;
 
@@ -15,7 +14,6 @@ export class UserDto {
     name: 'email',
     type: String,
     description: 'The email of the user',
-    nullable: false,
   })
   @IsString()
   @IsEmail()
@@ -25,7 +23,6 @@ export class UserDto {
     name: 'first_name',
     type: String,
     description: 'The first name of the user',
-    nullable: false,
   })
   @IsString()
   @Expose({ name: 'first_name' })
@@ -35,7 +32,6 @@ export class UserDto {
     name: 'last_name',
     type: String,
     description: 'The last name of the user',
-    nullable: false,
   })
   @IsString()
   @Expose({ name: 'last_name' })
@@ -45,7 +41,6 @@ export class UserDto {
     name: 'created_at',
     type: String,
     description: 'Creation timestamp',
-    nullable: false,
   })
   @Expose({ name: 'created_at' })
   createdAt!: Date;
@@ -54,7 +49,6 @@ export class UserDto {
     name: 'deleted_at',
     type: String,
     description: 'Deletion timestamp',
-    nullable: true,
   })
   @Expose({ name: 'deleted_at' })
   deletedAt?: Date;

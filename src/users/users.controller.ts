@@ -11,12 +11,14 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserDto } from './dto/user.dto';
-import { ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { QueryDto } from './dto/query.dto';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -24,7 +26,6 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @ApiCreatedResponse({ type: UserDto })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.findByEmail(createUserDto.email);
 
@@ -37,13 +38,20 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @ApiExtraModels(QueryDto)
+  async findAll(
+    @Query(new ValidationPipe({ transform: true })) query: QueryDto,
+  ) {
+    return await this.usersService.findAll(query);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.usersService.findById(id);
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with id '${id}' is not found.`);
+    }
+    return user;
   }
 
   @Patch(':id')

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,8 +17,19 @@ export class UsersService {
     return this.repository.save(newUser);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(query: QueryDto) {
+    const queryBuilder: SelectQueryBuilder<User> =
+      this.repository.createQueryBuilder('users_list');
+
+    const users = queryBuilder
+      .orderBy(`users_list.${query.sort}`, query.order)
+      .limit(query.limit)
+      .offset(query.offset);
+
+    if (query.showDeleted) {
+      users.withDeleted();
+    }
+    return users.getMany();
   }
 
   async findById(id: string) {

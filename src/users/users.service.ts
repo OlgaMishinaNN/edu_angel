@@ -13,11 +13,10 @@ export class UsersService {
   ) {}
 
   async create(createItemDto: CreateUserDto): Promise<User> {
-    const newUser = this.repository.create(createItemDto);
-    return this.repository.save(newUser);
+    return this.repository.save(createItemDto);
   }
 
-  async findAll(query: QueryDto) {
+  async findAll(query: QueryDto): Promise<User[]> {
     const queryBuilder: SelectQueryBuilder<User> =
       this.repository.createQueryBuilder('users_list');
 

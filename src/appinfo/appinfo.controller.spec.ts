@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppInfoController } from './appinfo.controller';
 import { AppInfoService } from './appinfo.service';
+import { AppInfoDto } from './dto/app-info.dto';
 
 describe('AppInfoController', () => {
   let controller: AppInfoController;
@@ -16,5 +17,13 @@ describe('AppInfoController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('getAppInfo => should return app info', async () => {
+    const appInfo = new AppInfoDto();
+
+    const result = controller.getAppInfo();
+
+    expect(result).toEqual(appInfo);
   });
 });

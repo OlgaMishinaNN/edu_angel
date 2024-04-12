@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder, UpdateResult } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryDto } from './dto/query.dto';
@@ -49,14 +49,16 @@ export class UsersService {
     return user;
   }
 
-  async update(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UpdateResult> {
-    return await this.repository.update(id, updateUserDto as User);
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    return await this.repository.save({ id, ...updateUserDto });
   }
 
-  async remove(id: string): Promise<UpdateResult> {
-    return await this.repository.softDelete(id);
+  async remove(id: string) {
+    await this.repository.softDelete(id);
+
+    return await this.repository.findOne({
+      where: { id: id },
+      withDeleted: true,
+    });
   }
 }

@@ -13,19 +13,36 @@ import {
   BadRequestException,
   Query,
   ValidationPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiExtraModels } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { QueryDto } from './dto/query.dto';
+import { UserDto } from './dto/user.dto';
 
+@ApiTags('Users API')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Creates a new user' })
+  @ApiExtraModels(CreateUserDto)
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Success',
+    type: UserDto,
+  })
+  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Conflict' })
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.findByEmail(createUserDto.email);
 
@@ -38,6 +55,12 @@ export class UsersController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Gets the list of all users' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: [UserDto],
+  })
   @ApiExtraModels(QueryDto)
   async findAll(
     @Query(new ValidationPipe({ transform: true })) query: QueryDto,
@@ -46,6 +69,18 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Gets the user by id' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'The id of the user',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: UserDto,
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not Found' })
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findById(id);
     if (!user) {
@@ -55,6 +90,19 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Updates the user data' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'The id of the user',
+  })
+  @ApiExtraModels(UpdateUserDto)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: UserDto,
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not Found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const user = await this.usersService.findById(id);
     if (!user) {
@@ -68,22 +116,28 @@ export class UsersController {
       throw new BadRequestException('Empty request body provided.');
     }
 
-    await this.usersService.update(id, updateUserDto);
-    return await this.usersService.findById(id);
+    return await this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Removes the user by id' })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'The id of the user',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Success',
+    type: UserDto,
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Not Found' })
   async remove(@Param('id') id: string) {
     const user = await this.usersService.findById(id);
     if (!user || user.deleted_at != null) {
       throw new NotFoundException();
     }
 
-    const response = await this.usersService.remove(id);
-    if (!response.affected) {
-      throw new NotFoundException();
-    }
-
-    return await this.usersService.findById(id);
+    return await this.usersService.remove(id);
   }
 }

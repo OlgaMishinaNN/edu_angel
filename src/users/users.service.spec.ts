@@ -112,7 +112,7 @@ describe('UsersService', () => {
       email: faker.internet.email(),
     };
 
-    jest.spyOn(mockUserRepository, 'softDelete').mockReturnValue(user);
+    jest.spyOn(mockUserRepository, 'findOne').mockReturnValue(user);
 
     const result = await service.remove(id);
 
@@ -181,12 +181,15 @@ describe('UsersService', () => {
       deleted_at: undefined,
     } as User;
 
-    jest.spyOn(mockUserRepository, 'update').mockReturnValue(user);
+    jest.spyOn(mockUserRepository, 'save').mockReturnValue(user);
 
     const result = await service.update(id, updateUserDto);
 
-    expect(mockUserRepository.update).toHaveBeenCalled();
-    expect(mockUserRepository.update).toHaveBeenCalledWith(id, updateUserDto);
+    expect(mockUserRepository.save).toHaveBeenCalled();
+    expect(mockUserRepository.save).toHaveBeenCalledWith({
+      id,
+      ...updateUserDto,
+    });
 
     expect(result).toEqual(user);
   });

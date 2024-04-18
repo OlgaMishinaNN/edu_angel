@@ -15,7 +15,7 @@ import { AppInfoModule } from './appinfo/appinfo.module';
       password: 'postgres',
       database: 'postgres',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
     }),
     UsersModule,
